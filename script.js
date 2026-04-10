@@ -1,4 +1,4 @@
-fetch("https://islamic-ai-lkej.onrender.com/ask")
+
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -46,5 +46,4 @@ voiceBtn.addEventListener("click", ()=>{
         input.value = e.results[0][0].transcript;
     };
 
-    rec.start();
-});
+    fetch("https://islamic-ai-lkej.onrender.com/ask")
