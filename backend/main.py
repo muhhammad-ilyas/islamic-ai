@@ -42,19 +42,49 @@ def get_fatwa():
 - https://askimam.org
 """
 
-
 def ai_engine(q):
-    if "dua" in q.lower():
-        return "🤲 اللهم إنك عفو تحب العفو فاعف عني"
 
+    # 🕌 Always check Islamic context first
+    if not is_islamic(q):
+        return "⚠️ Please ask only Islamic questions (Qur’an, Hadith, Dua, Fiqh)."
+
+    # 🤖 REAL AI RESPONSE (Smart structured logic + understanding)
+
+    prompt = f"""
+You are an Islamic assistant based on Qur'an and authentic Hadith.
+Answer ONLY in simple Islamic guidance.
+
+Question: {q}
+
+Rules:
+- Be short
+- Be accurate
+- Prefer Qur'an and Hadith
+- If fiqh question, mention Hanafi view politely
+"""
+
+    try:
+        # 🌐 Free AI model endpoint (no key version fallback)
+        response = requests.post(
+            "https://api-inference.huggingface.co/models/google/flan-t5-base",
+            headers={"Content-Type": "application/json"},
+            json={"inputs": prompt}
+        )
+
+        data = response.json()
+
+        if isinstance(data, list) and "generated_text" in data[0]:
+            return data[0]["generated_text"]
+
+    except:
+        pass
+
+    # 📖 fallback Quran
     ayah = get_quran(q)
     if ayah:
         return ayah
 
-    if "fatwa" in q.lower():
-        return get_fatwa()
-
-    return "🕌 Actions are judged by intentions (Bukhari)"
+    return "🕌 Please ask Islamic questions (Dua, Hadith, Qur’an, Fiqh)"
 
 
 @app.post("/ask")
