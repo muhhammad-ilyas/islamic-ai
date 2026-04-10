@@ -13,19 +13,29 @@ function addMsg(text, type){
     chat.scrollTop = chat.scrollHeight;
 }
 
-// SEND MESSAGE
-function send(){
+// SEND async function send(){
     const text = input.value.trim();
     if(!text) return;
 
     addMsg(text, "user");
     input.value = "";
 
-    // SIMPLE RESPONSE
-    setTimeout(()=>{
-        addMsg("🕌 Response received", "bot");
-    }, 500);
+    try {
+        const res = await fetch("https://your-app-name.onrender.com/ask", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ q: text, lang: "en" })
+        });
+
+        const data = await res.json();
+
+        addMsg(data.answer, "bot");
+
+    } catch (error) {
+        addMsg("⚠️ Server not responding", "bot");
+    }
 }
+
 
 // BUTTON CLICK FIX
 sendBtn.addEventListener("click", send);
