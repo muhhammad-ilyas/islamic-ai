@@ -1,15 +1,29 @@
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
-const voiceBtn = document.getElementById("voiceBtn");
 
-// ✅ ADD MESSAGE (ONLY ONCE)
+// 💬 ADD MESSAGE
 function addMsg(text, type){
     const div = document.createElement("div");
     div.className = "msg " + type;
     div.innerText = text;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+}
+
+// ⏳ TYPING INDICATOR
+function typing(){
+    const div = document.createElement("div");
+    div.className = "msg bot";
+    div.id = "typing";
+    div.innerText = "typing...";
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping(){
+    const t = document.getElementById("typing");
+    if(t) t.remove();
 }
 
 // 🚀 SEND MESSAGE
@@ -20,6 +34,8 @@ async function send(){
     addMsg(text, "user");
     input.value = "";
 
+    typing();
+
     try {
         const res = await fetch("https://islamic-ai-lkej.onrender.com/ask", {
             method: "POST",
@@ -29,31 +45,21 @@ async function send(){
 
         const data = await res.json();
 
+        removeTyping();
         addMsg(data.answer, "bot");
 
     } catch (error) {
+        removeTyping();
         addMsg("⚠️ Server not responding", "bot");
     }
 }
 
-// 🖱️ BUTTON CLICK
+// 🖱️ CLICK
 sendBtn.addEventListener("click", send);
 
-// ⌨️ ENTER KEY
+// ⌨️ ENTER
 input.addEventListener("keypress", function(e){
     if(e.key === "Enter"){
         send();
     }
-});
-
-// 🎤 VOICE INPUT (FIXED)
-voiceBtn.addEventListener("click", ()=>{
-    const rec = new webkitSpeechRecognition();
-    rec.lang = "ur-PK";
-
-    rec.onresult = (e) => {
-        input.value = e.results[0][0].transcript;
-    };
-
-    rec.start();
 });
