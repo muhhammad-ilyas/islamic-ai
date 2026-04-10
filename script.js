@@ -56,4 +56,13 @@ voiceBtn.addEventListener("click", ()=>{
     };
 
     rec.start();
+
+
+    function addMsg(text, type){
+    const div = document.createElement("div");
+    div.className = "msg " + type;
+    div.innerText = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
 });
