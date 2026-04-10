@@ -1,4 +1,3 @@
-
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -13,7 +12,8 @@ function addMsg(text, type){
     chat.scrollTop = chat.scrollHeight;
 }
 
-// SEND async function send(){
+// ✅ SEND FUNCTION (FIXED)
+async function send(){
     const text = input.value.trim();
     if(!text) return;
 
@@ -21,7 +21,7 @@ function addMsg(text, type){
     input.value = "";
 
     try {
-        const res = await fetch("https://your-app-name.onrender.com/ask", {
+        const res = await fetch("https://islamic-ai-lkej.onrender.com/ask", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ q: text, lang: "en" })
@@ -36,18 +36,17 @@ function addMsg(text, type){
     }
 }
 
-
-// BUTTON CLICK FIX
+// BUTTON CLICK
 sendBtn.addEventListener("click", send);
 
-// ENTER KEY FIX
+// ENTER KEY
 input.addEventListener("keypress", function(e){
     if(e.key === "Enter"){
         send();
     }
 });
 
-// VOICE FIX
+// VOICE INPUT (FIXED)
 voiceBtn.addEventListener("click", ()=>{
     const rec = new webkitSpeechRecognition();
     rec.lang = "ur-PK";
@@ -56,4 +55,5 @@ voiceBtn.addEventListener("click", ()=>{
         input.value = e.results[0][0].transcript;
     };
 
-    fetch("https://islamic-ai-lkej.onrender.com/ask")
+    rec.start();
+});
