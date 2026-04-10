@@ -44,29 +44,35 @@ def get_fatwa():
 
 def ai_engine(q):
 
-    # 🕌 Always check Islamic context first
-    if not is_islamic(q):
+    q_lower = q.lower()
+
+    # 🛡️ ISLAMIC SAFETY CHECK
+    allowed_keywords = [
+        "islam", "quran", "qur'an", "hadith", "dua",
+        "pray", "namaz", "zakat", "fasting", "ramadan",
+        "marriage", "halal", "haram", "fiqh", "fatwa"
+    ]
+
+    if not any(word in q_lower for word in allowed_keywords):
         return "⚠️ Please ask only Islamic questions (Qur’an, Hadith, Dua, Fiqh)."
 
-    # 🤖 REAL AI RESPONSE (Smart structured logic + understanding)
-
+    # 🤖 REAL AI PROMPT (Scholar Style)
     prompt = f"""
-You are an Islamic assistant based on Qur'an and authentic Hadith.
-Answer ONLY in simple Islamic guidance.
-
-Question: {q}
+You are a knowledgeable Islamic assistant based on Qur'an and authentic Hadith.
 
 Rules:
-- Be short
-- Be accurate
-- Prefer Qur'an and Hadith
-- If fiqh question, mention Hanafi view politely
+- Answer in simple language (Urdu/English mix allowed)
+- Use Qur'an or Hadith when possible
+- Follow general Sunni/Hanafi understanding
+- Do NOT give extreme or unsafe opinions
+- Keep answer short and clear
+
+Question: {q}
 """
 
     try:
-        # 🌐 Free AI model endpoint (no key version fallback)
         response = requests.post(
-            "https://api-inference.huggingface.co/models/google/flan-t5-base",
+            "https://api-inference.huggingface.co/models/google/flan-t5-large",
             headers={"Content-Type": "application/json"},
             json={"inputs": prompt}
         )
@@ -74,17 +80,17 @@ Rules:
         data = response.json()
 
         if isinstance(data, list) and "generated_text" in data[0]:
-            return data[0]["generated_text"]
+            return "🕌 " + data[0]["generated_text"]
 
     except:
         pass
 
-    # 📖 fallback Quran
+    # 📖 FALLBACK: QURAN SEARCH
     ayah = get_quran(q)
     if ayah:
         return ayah
 
-    return "🕌 Please ask Islamic questions (Dua, Hadith, Qur’an, Fiqh)"
+    return "🕌 Please try again or ask a clearer Islamic question."
 
 
 @app.post("/ask")
