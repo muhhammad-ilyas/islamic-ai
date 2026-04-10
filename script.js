@@ -3,7 +3,7 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const voiceBtn = document.getElementById("voiceBtn");
 
-// ADD MESSAGE
+// ✅ ADD MESSAGE (ONLY ONCE)
 function addMsg(text, type){
     const div = document.createElement("div");
     div.className = "msg " + type;
@@ -12,7 +12,7 @@ function addMsg(text, type){
     chat.scrollTop = chat.scrollHeight;
 }
 
-// ✅ SEND FUNCTION (FIXED)
+// 🚀 SEND MESSAGE
 async function send(){
     const text = input.value.trim();
     if(!text) return;
@@ -36,33 +36,24 @@ async function send(){
     }
 }
 
-// BUTTON CLICK
+// 🖱️ BUTTON CLICK
 sendBtn.addEventListener("click", send);
 
-// ENTER KEY
+// ⌨️ ENTER KEY
 input.addEventListener("keypress", function(e){
     if(e.key === "Enter"){
         send();
     }
 });
 
-// VOICE INPUT (FIXED)
+// 🎤 VOICE INPUT (FIXED)
 voiceBtn.addEventListener("click", ()=>{
     const rec = new webkitSpeechRecognition();
     rec.lang = "ur-PK";
 
-    rec.onresult = e=>{
+    rec.onresult = (e) => {
         input.value = e.results[0][0].transcript;
     };
 
     rec.start();
-
-
-    function addMsg(text, type){
-    const div = document.createElement("div");
-    div.className = "msg " + type;
-    div.innerText = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-}
 });
