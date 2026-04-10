@@ -75,3 +75,34 @@ button {
     background: #00a884;
     color: white;
 }
+/* MOBILE RESPONSIVE FIX */
+@media (max-width: 600px) {
+
+    header {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    #chat {
+        padding: 8px;
+    }
+
+    .msg {
+        max-width: 90%;
+        font-size: 14px;
+    }
+
+    #inputArea {
+        padding: 8px;
+    }
+
+    input {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    button {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
