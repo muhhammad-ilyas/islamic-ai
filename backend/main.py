@@ -1,11 +1,10 @@
+import requests
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
 
 app = FastAPI()
 
-# ✅ CORS FIX
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,84 +18,80 @@ class Query(BaseModel):
     lang: str = "en"
 
 
-def is_islamic(text):
-    words = ["allah","quran","hadith","dua","islam","namaz","roza","zakat","fatwa"]
-    return any(w in text.lower() for w in words)
+# 🕌 SIMPLE DUAS DATABASE
+DUAS = {
+    "sleep": "اللهم باسمك أموت وأحيا",
+    "eat": "بِسْمِ ٱللّٰهِ وَعَلَىٰ بَرَكَةِ ٱللّٰهِ",
+    "home": "بِسْمِ ٱللّٰهِ تَوَكَّلْتُ عَلَى ٱللّٰهِ",
+}
 
 
-def get_quran(text):
-    try:
-        url = f"https://api.quran.com/api/v4/search?q={text}"
-        r = requests.get(url).json()
-
-        if r.get("search", {}).get("results"):
-            ayah = r["search"]["results"][0]
-            return f"📖 {ayah['text']} ({ayah['verse_key']})"
-    except:
-        return None
+def is_islamic(q):
+    keywords = ["islam","quran","hadith","dua","pray","namaz","marriage","fasting","zakat"]
+    return any(k in q.lower() for k in keywords)
 
 
-def get_fatwa():
-    return """⚖️ Hanafi Fatwa:
-- https://darulifta-deoband.com
-- https://askimam.org
-"""
+# 🤖 REAL GPT-LIKE RESPONSE (Hugging Face)
+def ask_ai(q):
 
-def ai_engine(q):
-
-    q_lower = q.lower()
-
-    # 🛡️ ISLAMIC SAFETY CHECK
-    allowed_keywords = [
-        "islam", "quran", "qur'an", "hadith", "dua",
-        "pray", "namaz", "zakat", "fasting", "ramadan",
-        "marriage", "halal", "haram", "fiqh", "fatwa"
-    ]
-
-    if not any(word in q_lower for word in allowed_keywords):
-        return "⚠️ Please ask only Islamic questions (Qur’an, Hadith, Dua, Fiqh)."
-
-    # 🤖 REAL AI PROMPT (Scholar Style)
     prompt = f"""
-You are a knowledgeable Islamic assistant based on Qur'an and authentic Hadith.
+You are an Islamic scholar AI based on Qur'an and authentic Hadith.
 
 Rules:
-- Answer in simple language (Urdu/English mix allowed)
-- Use Qur'an or Hadith when possible
-- Follow general Sunni/Hanafi understanding
-- Do NOT give extreme or unsafe opinions
-- Keep answer short and clear
+- Be accurate
+- Use simple explanation
+- Prefer Qur'an or Hadith if needed
+- Follow Sunni (Hanafi-friendly) understanding
+- Do not be extreme
 
 Question: {q}
 """
 
     try:
         response = requests.post(
-            "https://api-inference.huggingface.co/models/google/flan-t5-large",
+            "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
             headers={"Content-Type": "application/json"},
             json={"inputs": prompt}
         )
 
         data = response.json()
 
-        if isinstance(data, list) and "generated_text" in data[0]:
-            return "🕌 " + data[0]["generated_text"]
+        if isinstance(data, list):
+            return "🕌 " + data[0].get("generated_text", "No response")
 
     except:
         pass
 
-    # 📖 FALLBACK: QURAN SEARCH
-    ayah = get_quran(q)
-    if ayah:
-        return ayah
+    return "🕌 AI temporarily unavailable, try again."
 
-    return "🕌 Please try again or ask a clearer Islamic question."
+
+# 🧠 MAIN ENGINE
+def ai_engine(q):
+
+    q_lower = q.lower()
+
+    # 🕌 DUAS FIRST
+    for k in DUAS:
+        if k in q_lower:
+            return f"🤲 {DUAS[k]}"
+
+    # ⚖️ MARRIAGE
+    if "marry" in q_lower or "marriage" in q_lower:
+        return """⚖️ Islamic View (Hanafi):
+A man can marry up to 4 wives if he is just.
+
+Conditions:
+✔ Justice
+✔ Financial support
+✔ Equal treatment"""
+
+    # 🤖 REAL AI
+    if is_islamic(q):
+        return ask_ai(q)
+
+    return "⚠️ Please ask Islamic questions only"
 
 
 @app.post("/ask")
 def ask(data: Query):
-
-    if not is_islamic(data.q):
-        return {"answer": "⚠️ Only Islamic questions allowed"}
-
     return {"answer": ai_engine(data.q)}
